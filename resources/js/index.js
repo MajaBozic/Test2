@@ -55,61 +55,92 @@ let dinos = [
    }
 ]
 
-const naruceno = []
+let naruceno = []
 let count = 0
-const kupac = document.getElementById('kupac')
-const inputValue = document.getElementsByName('cena')
-const selectDino = document.getElementById('select-dino')
-const Scipionyx  = document.getElementById('0') 
-const Becklespinax = document.getElementById('1')
-const Sciurumimus = document.getElementById('2')
-const Hypsilophodon = document.getElementById('3')
-const submitBtn = document.getElementById('submit')
-const itemCont = document.getElementById('item-container')
-const delBtn = document.selectElementByClassName('delete')
-const ispisiSvePor = document.getElementById('btn-all')
-const napomena = document.getElementsByName('napomena')
 
-submitBtn.addEventListener('click', () => {
-   if (!validInput()) {
-      if ((selectDino.value == '' && kupac.value =='' || kupac.value.length < 4))
-         const greska = document.createElement('div')
-      greska.innerHTML = `
-          <p>1. Поља не смеју бити празна</p>
-          <p>2. Унос ѕа купца 'дужина мора бити најманје 4 слова</p>
-      `
-      itemCont.appendChild(greska)
+const selectDino = document.querySelector('#select-dino')
+dinos.forEach(dino => {
+    const option = document.createElement('option')
+    option.value = dino.id
+    option.textContent = dino.name
+    selectDino.appendChild(option)
+})
 
-      setTimeout(() => {
-         greska.remove()
-      }, 3000)
+const kupacInput = document.querySelector('#kupac')
+const naruciForma = document.querySelector('#forma')
+const napomenaTaf = document.querySelector('.textarea-field')
+const itemCont = document.querySelector('#item-container')
 
-      return
-   }
-   else if (napomena.value =='') {
-      const greska = document.createElement('div')
-      greska.innerHTML = `Напомена: / `
-   } else {
-      itemCont.push({ /*dinos[i]..?*/
-         name: inputName.value,
-         id: inputId.value,
-         img: inputImg.value,
-         value: inputValue.value,
-         currency: "RSD",
-      })
-   }
-   
-   console.log(itemCont[naruceno.length - 1])
-   addElementToDOM(naruceno) /*???*/
+const validno = () => kupacInput.value.trim() !== ''
+                      && kupacInput.value.trim().length >= 4
+                      && selectDino.value.trim() !== ''
+                   // && selectDino.value.trim() !== '-1'
 
-   count++
-},
+const addElemToDOM = (elem) => {
+    const item = document.createElement('div')
+    item.className = 'item'
+    const p0 = document.createElement('p') 
+    const p1 = document.createElement('p') 
+    const p2 = document.createElement('p') 
+    const p3 = document.createElement('p') 
+    const p4 = document.createElement('p') 
+    const p5 = document.createElement('p') 
 
-ispisiSvePor.addEventListener('click', () => {
-   naruceno.innerHTML = itemCount
-}),
+    p0.innerHTML = `<img style = 'width: 150px' src='${elem.slika}'>`
+    p1.innerHTML = `<span> Купац: </span> ${elem.kupac}`
+    p2.innerHTML = `<span> Напомена: </span> ${elem.napomena}`
+    p3.innerHTML = `<span> Диносаурус: </span> ${elem.ime}`
+    p4.innerHTML = `<span> Цена: </span> ${elem.cena} din`
 
-delBtn.addEventListener('click', () => {
-   this.remove()
-   count--
-}))
+    const btnObrisi = document.createElement('button')
+    btnObrisi.innerText = 'Обриши'
+    btnObrisi.addEventListener('click', (e) => {
+        e.target.parentElement.parentElement.remove()   //sa str
+        naruceno.splice(naruceno.findIndex(el => el.id === elem.id), 1)   //iz niza
+    })
+
+    p5.appendChild(btnObrisi)
+    item.append(p0, p1, p2, p3, p4, p5)
+    itemCont.appendChild(item)
+
+    //reset
+    kupacInput.value = ''
+    napomenaTaf.value = ''
+    selectDino.value = '-1'
+}
+
+naruciForma.addEventListener('submit', (e) => {
+    e.preventDefault()
+    if (!validno()) {
+        const greska = document.createElement('div')
+        greska.innerHTML = `<b style = 'color: red'>ГРЕШКА</b>`
+
+        e.target.insertBefore(greska, e.target.children[e.target.children.length])
+
+        setTimeout(() => {
+            greska.remove()
+        }, 2100)
+
+        return
+    }
+
+    const dino = dinos.find(dino => dino.id == Number(selectDino.value))
+
+    naruceno.push({
+        id: count,
+        kupac: kupacInput.value.trim(),
+        ime: dino.name,
+        napomena: napomenaTaf.value.trim() == '' ? '/' : napomenaTaf.value.trim(),
+        cena: dino.cena,
+        slika: dino.img
+    })
+
+    count++
+
+    addElemToDOM(naruceno[naruceno.length - 1])
+})
+
+const sve = document.querySelector('#btn-all')
+sve.addEventListener('click', (e) => {
+    console.log(naruceno)
+})
